@@ -1,0 +1,1974 @@
+---
+openapi: 3.0.3
+info:
+  title: API Cobrança Bancária - Gestão de Boletos Integrada
+  description: "# 1. Descrição: \n API Cobrança Bancária - Gestão de Boleto Integrada:\
+    \ \nEste serviço permite a gestão dos boletos bancários do produto COBRANÇA BANCÁ\
+    RIA CAIXA, \ndisponibilizando as funcionalidades de inclusão, alteração, baixa\
+    \ e consulta de boletos bancários emitidos pela CAIXA."
+  version: "1.0"
+servers:
+- url: https://api.des.caixa:8443/cobranca/boletos/
+tags:
+- name: SIGCB - Cancelamento/Exclusão da Negativação de Titulo
+  description: 'Solicita a exclusao ou cancelamento da negativacao do titulo. '
+- name: SIGCB - Histórico da Escrituradora
+  description: Consulta o histórico da situação contratual do beneficiário.
+- name: SIGCB - Integração SISNG
+  description: Consulta e apropria simulações no SISNG.
+- name: SIGCB - Manutenção de Boleto
+  description: "Inclui, altera, consulta e realiza baixa em boletos."
+paths:
+  /incluiCarne:
+    post:
+      tags:
+      - SIGCB - Manutenção de Boleto
+      summary: Envia os dados de Boleto para inclusão do Boleto Carne
+      operationId: incluiCarne
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InclusaoTituloCarneDTO'
+      responses:
+        "200":
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  codigoRetorno:
+                    description: Codigo Retorno
+                    default: "0"
+                    type: string
+                  mensagemRetorno:
+                    description: Mensagem do Sistema
+                    default: OPERACAO EFETUADA
+                    type: string
+        "400":
+          description: Erro de sintaxe
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  negocial:
+                    $ref: '#/components/schemas/NegocialDTO'
+                  integracao:
+                    $ref: '#/components/schemas/IntegracaoDTO'
+        "401":
+          description: Nao Autorizado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  negocial:
+                    $ref: '#/components/schemas/NegocialDTO'
+                  integracao:
+                    $ref: '#/components/schemas/IntegracaoDTO'
+        "404":
+          description: Boleto não encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  negocial:
+                    $ref: '#/components/schemas/NegocialDTO'
+                  integracao:
+                    $ref: '#/components/schemas/IntegracaoDTO'
+        "500":
+          description: Erro servidor interno
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  negocial:
+                    $ref: '#/components/schemas/NegocialDTO'
+                  integracao:
+                    $ref: '#/components/schemas/IntegracaoDTO'
+  /sisng/apropriar-simulacao:
+    post:
+      tags:
+      - SIGCB - Integração SISNG
+      summary: Apropria uma simulação no SISNG
+      requestBody:
+        content:
+          text/plain:
+            schema:
+              type: string
+      responses:
+        "200":
+          description: OK
+  /sisng/consulta-simulacao:
+    post:
+      tags:
+      - SIGCB - Integração SISNG
+      summary: Consulta uma simulação no SISNG por número ou CNPJ
+      requestBody:
+        content:
+          text/plain:
+            schema:
+              type: string
+      responses:
+        "200":
+          description: OK
+  /v1/alteraBoleto:
+    post:
+      tags:
+      - SIGCB - Manutenção de Boleto
+      summary: Envia os dados de Boleto para Alteração do Boleto
+      parameters:
+      - name: idBeneficiario
+        in: query
+        description: "Informe o Id do Beneficiário \n \n 1 a 10 Caracteres Númericos\
+          \ Inteiros \n\n Ex: 1100689"
+        required: true
+        schema:
+          pattern: "^\\d{1,10}$"
+          type: string
+      - name: nossoNumero
+        in: query
+        description: "Informe o Nosso Número \n \n 1 a 17 Caracteres Númericos Inteiros\
+          \ \n\n Ex: 14000000010194476"
+        required: true
+        schema:
+          pattern: "^\\d{1,17}$"
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AlteracaoBoletoRequestDTO'
+      responses:
+        "200":
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  codRetorno:
+                    format: int32
+                    description: Codigo Retorno
+                    default: 0
+                    type: integer
+                  numCodBarras:
+                    description: Número Código Barras
+                    default: "10495131100000350001100036100100040000021928"
+                    type: string
+                  numLinhaDigTvl:
+                    description: Número Linha Digitável
+                    default: "10491100083610010004300000219287513110000035000"
+                    type: string
+                  urlBoleto:
+                    description: URL Boleto
+                    default: https://10.116.82.66:8010/ecobranca/SIGCB/imprimir/1100036/14100000000002192
+                    type: string
+                  qrCode:
+                    description: String do QrCode
+                    default: 00020101021226910014br.gov.bcb.pix2569pix-qrcode-h.caixa.gov.br/api/v2/cobv/CO011011000360141000000000021925204000053039865802BR5905teste6008PARACATU62070503***63049252
+                    type: string
+                  urlQrcode:
+                    description: URL do QrCode
+                    default: https://10.116.82.66:8010/ecobranca/SIGCB/imprimir/1100036/14100000000002192/qrcode
+                    type: string
+                  codErro:
+                    format: int32
+                    description: Código Erro
+                    default: 0
+                    type: integer
+                  msgSistema:
+                    description: Mensagem do Sistema
+                    default: OPERACAO EFETUADA
+                    type: string
+        "401":
+          description: Não Autorizado.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  negocial:
+                    $ref: '#/components/schemas/NegocialDTO'
+                  integracao:
+                    $ref: '#/components/schemas/IntegracaoDTO'
+        "400":
+          description: Erro de sintaxe
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  negocial:
+                    $ref: '#/components/schemas/NegocialDTO'
+                  integracao:
+                    $ref: '#/components/schemas/IntegracaoDTO'
+        "404":
+          description: Boleto não encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  negocial:
+                    $ref: '#/components/schemas/NegocialDTO'
+                  integracao:
+                    $ref: '#/components/schemas/IntegracaoDTO'
+        "500":
+          description: Erro servidor interno
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  negocial:
+                    $ref: '#/components/schemas/NegocialDTO'
+                  integracao:
+                    $ref: '#/components/schemas/IntegracaoDTO'
+  /v1/baixaBoleto:
+    put:
+      tags:
+      - SIGCB - Manutenção de Boleto
+      summary: Realizar a Baixa de Boleto
+      parameters:
+      - name: idBeneficiario
+        in: query
+        description: "Informe o Id do Beneficiário \n \n 1 a 10 Caracteres Númericos\
+          \ Inteiros \n\n Ex: 1100689"
+        required: true
+        schema:
+          pattern: "^\\d{1,10}$"
+          type: string
+      - name: nossoNumero
+        in: query
+        description: "Informe o Nosso Número \n \n 1 a 17 Caracteres Númericos Inteiros\
+          \ \n\n Ex: 14000000010194476"
+        required: true
+        schema:
+          pattern: "^\\d{1,17}$"
+          type: string
+      responses:
+        "200":
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  codRetorno:
+                    format: int32
+                    description: Codigo Retorno
+                    default: 0
+                    type: integer
+                  codErro:
+                    format: int32
+                    description: Código Erro
+                    default: 0
+                    type: integer
+                  msgSistema:
+                    description: Mensagem do Sistema
+                    default: OPERACAO EFETUADA COM SUCESSO
+                    type: string
+        "400":
+          description: Erro de sintaxe
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  negocial:
+                    $ref: '#/components/schemas/NegocialDTO'
+                  integracao:
+                    $ref: '#/components/schemas/IntegracaoDTO'
+        "401":
+          description: Não Autorizado.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  negocial:
+                    $ref: '#/components/schemas/NegocialDTO'
+                  integracao:
+                    $ref: '#/components/schemas/IntegracaoDTO'
+        "404":
+          description: Boleto não encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  negocial:
+                    $ref: '#/components/schemas/NegocialDTO'
+                  integracao:
+                    $ref: '#/components/schemas/IntegracaoDTO'
+        "500":
+          description: Erro servidor interno
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  negocial:
+                    $ref: '#/components/schemas/NegocialDTO'
+                  integracao:
+                    $ref: '#/components/schemas/IntegracaoDTO'
+  /v1/beneficiario/{codBeneficiario}/escrituradora/historico:
+    get:
+      tags:
+      - SIGCB - Histórico da Escrituradora
+      summary: Consulta o histórico da situação contratual do beneficiário na escrituradora
+      parameters:
+      - name: codBeneficiario
+        in: path
+        required: true
+        schema:
+          format: int64
+          type: integer
+      responses:
+        "200":
+          description: OK
+  /v1/beneficiarios/{nuCedente}/webhook:
+    get:
+      tags:
+      - SIGCB - Manutenção de Boleto
+      summary: Consulta a URL de webhook configurada para o beneficiário
+      parameters:
+      - name: nuCedente
+        in: path
+        required: true
+        schema:
+          format: int64
+          type: integer
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+      - SIGCB - Manutenção de Boleto
+      summary: Cadastra ou atualiza a URL de webhook do beneficiário
+      parameters:
+      - name: nuCedente
+        in: path
+        required: true
+        schema:
+          format: int64
+          type: integer
+      - name: X-Request-ID
+        in: header
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificaURLDTO'
+      responses:
+        "200":
+          description: OK
+  /v1/cadastroURL:
+    put:
+      tags:
+      - SIGCB - Manutenção de Boleto
+      summary: Realizar o cadastramento/Atualizacao de URL de WEBHOOK de beneficiário
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificaURLDTO'
+      responses:
+        "200":
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  idBeneficiario:
+                    format: int64
+                    description: Id do Beneficiário
+                    type: integer
+                    example: "Informe o Id do Beneficiário de 1 a 10 Caracteres Nú\
+                      mericos Ex: 1100689"
+                  cpfCnpj:
+                    description: CPF ou CNPJ
+                    default: "Ex: para CPF: 99999999999 ou para CNPJ: 99999999999999"
+                    type: string
+                  notificacaoURL:
+                    description: Url da Notificação
+                    default: "Ex: https://www.dominio.com.br/url_notificacao"
+                    type: string
+                  urlWebhook:
+                    type: string
+                  requestId:
+                    type: string
+        "401":
+          description: Não Autorizado.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  negocial:
+                    $ref: '#/components/schemas/NegocialDTO'
+                  integracao:
+                    $ref: '#/components/schemas/IntegracaoDTO'
+        "400":
+          description: Erro de sintaxe
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  negocial:
+                    $ref: '#/components/schemas/NegocialDTO'
+                  integracao:
+                    $ref: '#/components/schemas/IntegracaoDTO'
+        "404":
+          description: Beneficiário não encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  negocial:
+                    $ref: '#/components/schemas/NegocialDTO'
+                  integracao:
+                    $ref: '#/components/schemas/IntegracaoDTO'
+        "500":
+          description: Erro servidor interno
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  negocial:
+                    $ref: '#/components/schemas/NegocialDTO'
+                  integracao:
+                    $ref: '#/components/schemas/IntegracaoDTO'
+  /v1/cancelamento-negativacao:
+    put:
+      tags:
+      - SIGCB - Cancelamento/Exclusão da Negativação de Titulo
+      summary: Envia os dados do título para exclusão ou cancelamento da negativação
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NegativacaoDTO'
+      responses:
+        "200":
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  origem:
+                    description: Origem da Resposta
+                    default: Método de Resposta do Erro
+                    type: string
+                  codigo:
+                    description: codigo da Resposta
+                    default: "99"
+                    type: string
+                  mensagem:
+                    description: Mensagem da Resposta
+                    default: Mensagem genérica de acordo com o erro do método
+                    type: string
+                  excecao:
+                    description: Erro de Excessão da Resposta
+                    default: Descricao da resposta de exceção de falhas
+                    type: string
+                  exception:
+                    format: int32
+                    description: statusType
+                    default: 200
+                    type: integer
+        "401":
+          description: Não autorizado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  negocial:
+                    $ref: '#/components/schemas/NegocialDTO'
+                  integracao:
+                    $ref: '#/components/schemas/IntegracaoDTO'
+        "400":
+          description: Erro de sintaxe
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  negocial:
+                    $ref: '#/components/schemas/NegocialDTO'
+                  integracao:
+                    $ref: '#/components/schemas/IntegracaoDTO'
+        "404":
+          description: Boleto não encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  negocial:
+                    $ref: '#/components/schemas/NegocialDTO'
+                  integracao:
+                    $ref: '#/components/schemas/IntegracaoDTO'
+        "500":
+          description: Erro servidor interno
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  negocial:
+                    $ref: '#/components/schemas/NegocialDTO'
+                  integracao:
+                    $ref: '#/components/schemas/IntegracaoDTO'
+  /v1/consultaBoleto:
+    get:
+      tags:
+      - SIGCB - Manutenção de Boleto
+      summary: Consulta os dados do Boleto
+      parameters:
+      - name: idBeneficiario
+        in: query
+        description: "Informe o Id do Beneficiário \n \n 1 a 10 Caracteres Númericos\
+          \ Inteiros \n\n Ex: 1100689"
+        required: true
+        schema:
+          pattern: "^\\d{1,10}$"
+          type: string
+      - name: nossoNumero
+        in: query
+        description: "Informe o Nosso Número \n \n 1 a 17 Caracteres Númericos Inteiros\
+          \ \n\n Ex: 14000000010194476"
+        required: true
+        schema:
+          pattern: "^\\d{1,17}$"
+          type: string
+      responses:
+        "200":
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  dadosCadastrais:
+                    description: Dados Cadastrais
+                    type: object
+                    allOf:
+                    - $ref: '#/components/schemas/DadosCadastrais'
+                  dadosComplementares:
+                    description: Dados Complementares
+                    type: object
+                    allOf:
+                    - $ref: '#/components/schemas/DadosComplementares'
+        "401":
+          description: Não Autorizado.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  negocial:
+                    $ref: '#/components/schemas/NegocialDTO'
+                  integracao:
+                    $ref: '#/components/schemas/IntegracaoDTO'
+        "400":
+          description: Erro de sintaxe
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  negocial:
+                    $ref: '#/components/schemas/NegocialDTO'
+                  integracao:
+                    $ref: '#/components/schemas/IntegracaoDTO'
+        "404":
+          description: Boleto não encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  negocial:
+                    $ref: '#/components/schemas/NegocialDTO'
+                  integracao:
+                    $ref: '#/components/schemas/IntegracaoDTO'
+        "500":
+          description: Erro servidor interno
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  negocial:
+                    $ref: '#/components/schemas/NegocialDTO'
+                  integracao:
+                    $ref: '#/components/schemas/IntegracaoDTO'
+  /v1/incluiBoleto:
+    post:
+      tags:
+      - SIGCB - Manutenção de Boleto
+      summary: Envia os dados de Boleto para inclusão do Boleto
+      operationId: inclusaoBoleto
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InclusaoTituloDTO'
+      responses:
+        "200":
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  codRetorno:
+                    format: int32
+                    description: Codigo Retorno
+                    default: 0
+                    type: integer
+                  numCodBarras:
+                    description: Número Código Barras
+                    default: "10495131100000350001100036100100040000021928"
+                    type: string
+                  numLinhaDigTvl:
+                    description: Número Linha Digitável
+                    default: "10491100083610010004300000219287513110000035000"
+                    type: string
+                  nossoNumGerado:
+                    format: int64
+                    description: Nosso Número Gerado
+                    default: 14100000000002192
+                    type: integer
+                  urlBoleto:
+                    description: URL Boleto
+                    default: https://10.116.82.66:8010/ecobranca/SIGCB/imprimir/1100036/14100000000002192
+                    type: string
+                  qrCode:
+                    description: String do QrCode
+                    default: 00020101021226910014br.gov.bcb.pix2569pix-qrcode-h.caixa.gov.br/api/v2/cobv/CO011011000360141000000000021925204000053039865802BR5905teste6008PARACATU62070503***63049252
+                    type: string
+                  urlQrcode:
+                    description: URL do QrCode
+                    default: https://10.116.82.66:8010/ecobranca/SIGCB/imprimir/1100036/14100000000002192/qrcode
+                    type: string
+                  codErro:
+                    format: int32
+                    description: Código Erro
+                    default: 0
+                    type: integer
+                  msgSistema:
+                    description: Mensagem do Sistema
+                    default: OPERACAO EFETUADA
+                    type: string
+        "400":
+          description: Erro de sintaxe
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  negocial:
+                    $ref: '#/components/schemas/NegocialDTO'
+                  integracao:
+                    $ref: '#/components/schemas/IntegracaoDTO'
+        "401":
+          description: Nao Autorizado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  negocial:
+                    $ref: '#/components/schemas/NegocialDTO'
+                  integracao:
+                    $ref: '#/components/schemas/IntegracaoDTO'
+        "404":
+          description: Boleto não encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  negocial:
+                    $ref: '#/components/schemas/NegocialDTO'
+                  integracao:
+                    $ref: '#/components/schemas/IntegracaoDTO'
+        "500":
+          description: Erro servidor interno
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  negocial:
+                    $ref: '#/components/schemas/NegocialDTO'
+                  integracao:
+                    $ref: '#/components/schemas/IntegracaoDTO'
+components:
+  schemas:
+    AlteracaoBoletoRequestDTO:
+      type: object
+      properties:
+        numeroDocumento:
+          description: Número Documento
+          default: "Ex: 123456"
+          type: string
+        dataVencimento:
+          description: Data de Vencimento
+          default: 2025-12-31
+          type: string
+          allOf:
+          - $ref: '#/components/schemas/LocalDate'
+        valor:
+          description: Valor
+          default: 9.99999999999999E12
+          type: number
+        tipoEspecie:
+          format: int32
+          description: Tipo Espécie
+          default: "Informe o Id: 1-CHEQUE, 2-DUPLICATA MERCANTIL, 3-DUPLICATA MERCANTIL\
+            \ POR INDICACAO, 4-DUPLICATA DE SERVICO, 5-DUPLICATA DE SERVICO POR INDICACAO,\
+            \ 6-DUPLICATA RURAL, 7-LETRA DE CAMBIO, 8-NOTA DE CREDITO COMERCIAL, 9-NOTA\
+            \ DE CREDITO A EXPORTACAO, 10-NOTA DE CREDITO INDUSTRIAL, 11-NOTA DE CREDITO\
+            \ RURAL, 12-NOTA PROMISSORIA, 13-NOTA PROMISSORIA RURAL, 14-TRIPLICATA\
+            \ MERCANTIL, 15-TRIPLICATA DE SERVICO, 16-NOTA DE SEGURO, 17-RECIBO, 18-BLOQUETO,\
+            \ 19-NOTA DE DEBITO, 20-APOLICE DE SEGURO, 21-MENSALIDADE ESCOLAR, 22-PARCELA\
+            \ DE CONSORCIO, 23-NOTA FISCAL, 24-DOCUMENTO DE DIVIDA, 25-CEDULA DE PRODUTO\
+            \ RURAL, 31-CARTAO DE CREDITO, 32-BOLETO PROPOSTA, 33-BOLETO DE DEPOSITO\
+            \ E APORTE, 81-INCLUSAO TESTE, 99-OUTROS."
+          type: integer
+        flagAceite:
+          description: Flag Aceite
+          default: Informe o A-Sim ou N-Não
+          type: string
+        JurosMora:
+          description: Juros Mora
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/JurosMoraDTO'
+        valorAbatimento:
+          description: Valor Abatimento
+          default: 9.99999999999999E12
+          type: number
+        posVencimento:
+          description: Pos Vencimento
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/PosVencimentoDTO'
+        pagador:
+          description: Pagador
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/PagadorAlteraDTO'
+        tpidentcsacdravalst:
+          format: int32
+          description: Tipo de Avalista
+          default: "Informe o Id: 0-Isento / Não Informado, 1-CPF 2-CNPJ, 3-PIS/PASEP,\
+            \ 9-Outros."
+          type: integer
+        avalista:
+          description: Avalista
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/AvalistaDTO'
+        endereco:
+          description: Endereço
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/EnderecoDTO'
+        multa:
+          description: Multa
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/MultaDTO'
+        descontos:
+          description: Descontos
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/DescontosTituloDTO'
+        valorIof:
+          description: valorIof
+          default: 999.99
+          type: number
+        identificacaoEmpresa:
+          description: Identificação do titulo na empresa
+          default: Campo destinado para uso da Empresa Beneficiário para identificação
+            do Título
+          type: string
+        fichaCompensacao:
+          description: Ficha de Compensação
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/FichaCompensacaoBoletoDTO'
+        reciboPagador:
+          description: "Texto de observações destinado ao envio de mensagens livres,\
+            \ a serem impressas na parte Recibo do Pagador do boleto"
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/ReciboPagadorDTO'
+        pagamento:
+          description: Pagamento
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/PagamentoDTO'
+        tipoBoleto:
+          description: Tipo de Boleto
+          default: "Ex: PADRAO, HIBRIDO ou QRCODE"
+          type: string
+          allOf:
+          - $ref: '#/components/schemas/TipoBoletoDTO'
+    AvalistaDTO:
+      type: object
+      properties:
+        cnpjCpf:
+          description: Cnpj ou CPF
+          default: "CPF: 99999999999 ou para CNPJ: 99999999999999"
+          type: string
+        nome:
+          description: Nome Pessoa Física ou Juridica
+          default: "Ex: João da Silva"
+          type: string
+    BeneficiarioFinal:
+      description: Beneficio Final
+      type: object
+      properties:
+        cpfCnpj:
+          description: Número de Inscrição
+          default: "80393756904"
+          type: string
+        nome:
+          description: Nome do Beneficiario Final
+          default: Teste Teste
+          type: string
+    CarneSacadoDTO:
+      type: object
+      properties:
+        noSacado:
+          description: Nome do Sacado
+          default: "Ex: José da Silva"
+          type: string
+        noEmailSacado:
+          description: E-mail Sacado
+          default: "Ex: email@dominio.com.br"
+          type: string
+        noLogradouroScdo:
+          description: Endereço
+          default: Quadra 202
+          type: string
+        nuLocalSacado:
+          description: Número
+          default: "Ex: 101"
+          type: string
+        complemento:
+          description: Complemento do Endereço
+          default: "Ex: Plano Piloto"
+          type: string
+        noBairroSacado:
+          description: Nome do Bairro
+          default: "Ex: Asa Sul"
+          type: string
+        noMunicipioScdo:
+          description: Nome da Cidade
+          default: "Ex: Brasília"
+          type: string
+        sgUfSacado:
+          description: Unidade da Federação
+          default: "Ex: DF"
+          type: string
+        cep:
+          format: int64
+          description: Número CEP do Complemento
+          default: 99999999
+          type: integer
+        nuInscricaoScdo:
+          format: int64
+          description: CPF ou CNPJ
+          default: "Ex: para CPF: 99999999999 ou para CNPJ: 99999999999999"
+          type: integer
+        icPessoaSacado:
+          format: int32
+          description: Tipo Pessoa
+          default: "Ex: 1-Pessoa Fisica ou 2-Pessoa Jurídica"
+          type: integer
+        nuDddCllrSacado:
+          format: int32
+          description: DDD Sacado
+          default: "Ex: 061"
+          type: integer
+        nuCelularSacado:
+          description: Telefone Sacado
+          default: "Ex: 999999999"
+          type: string
+        icTipoMnsgmSms:
+          format: int32
+          description: Indentificador Tipo Mensagem SMS
+          default: "Ex: 0 - Sem Mensagem, 1 - Mensagem Informativa, 2 - Mensagem com\
+            \ Representação Númérica, 3 - Mensagem PEC da Cobrança. *** O valor default\
+            \ da coluna se não informado deverá ser zeros."
+          type: integer
+    DadosCadastrais:
+      type: object
+      properties:
+        nossoNumero:
+          format: int64
+          description: Nosso Número
+          default: 14100000000002186
+          type: integer
+        numeroDocumento:
+          description: Nosso do Documento
+          default: "10482282"
+          type: string
+        dataVencimento:
+          description: Data de Vencimento
+          default: 2025-12-30
+          type: string
+        valor:
+          format: double
+          description: Valor
+          default: 350.0
+          type: number
+        tipoEspecie:
+          description: Tipo Espécie
+          default: NOTA PROMISSORIA
+          type: string
+        flagAceite:
+          description: Flag Aceite
+          default: COM ACEITE
+          type: string
+        dataEmissao:
+          description: Data de Emissão
+          default: 2025-03-27
+          type: string
+        jurosMora:
+          description: Juros Mora
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/JurosMora'
+        valorAbatimento:
+          format: double
+          description: Valor Abatimento
+          default: 0.0
+          type: number
+        posVencimento:
+          description: Data de Vencimento
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/PosVencimento'
+        codigoMoeda:
+          format: int32
+          description: Código Moeda
+          default: 9
+          type: integer
+        pagador:
+          description: Pagador
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/Pagador'
+        beneficiarioFinal:
+          description: Beneficiário Final
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/BeneficiarioFinal'
+        multa:
+          description: Multa
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/Multa'
+        valorIof:
+          format: double
+          description: valor Iof
+          default: 0.0
+          type: number
+        identificacaoEmpresa:
+          description: Identificação da Empresa
+          default: Identificacao da empresa
+          type: string
+        pagamento:
+          description: Pagamento
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/Pagamento'
+        carteira:
+          description: Carteira
+          default: REGISTRADA
+          type: string
+        tipoBoleto:
+          description: Tipo Boleto
+          default: PADRAO
+          type: string
+        valorPago:
+          description: Valor Pago
+          default: 0.0
+          type: number
+        situacao:
+          description: Situação
+          default: BAIXADO POR DEVOLUCAO
+          type: string
+        canalPagamento:
+          description: Canal de Pagamento
+          default: CANAL DE PAGAMENTO
+          type: string
+        fichaCompensacao:
+          description: Ficha de Compensação
+          type: array
+          items:
+            $ref: '#/components/schemas/MsgFichaCompBoletoDTO'
+        reciboPagador:
+          description: "Texto de observações destinado ao envio de mensagens livres,\
+            \ a serem impressas na parte Recibo do Pagador do boleto"
+          type: array
+          items:
+            $ref: '#/components/schemas/MsgReciboSacadoBoletoDTO'
+    DadosComplementares:
+      description: Dados Complementares
+      type: object
+      properties:
+        codigoBarras:
+          description: Código Barras
+          default: "10495131100000350001100036100100040000021928"
+          type: string
+        linhaDigitavel:
+          description: Linha Digitável
+          default: "10491100083610010004300000219287513110000035000"
+          type: string
+        url:
+          description: Url
+          default: https://10.116.82.66:8010/ecobranca/SIGCB/imprimir/1100036/14100000000002192
+          type: string
+        nossoNumero:
+          format: int64
+          description: Nosso Número
+          default: 14100000000002186
+          type: integer
+        qrCode:
+          description: String do QRCode
+          default: 00020101021226910014br.gov.bcb.pix2569pix-qrcode-h.caixa.gov.br/api/v2/cobv/CO011011000360141000000000021925204000053039865802BR5905teste6008PARACATU62070503***63049252
+          type: string
+        urlQrcode:
+          description: Url do QRCode
+          default: https://10.116.82.66:8010/ecobranca/SIGCB/imprimir/1100036/14100000000002192/qrcode
+          type: string
+    DescontosTituloDTO:
+      type: object
+      properties:
+        coddescttit1:
+          format: int32
+          description: Cód. Desconto 1
+          default: "Ex: 0-Isento, 1-Valor Fixo até a data informada, 2-Percentual\
+            \ até a data informada, 3-Valor por antecipação dia corrido, 4-Valor por\
+            \ antecipação dia útil, 5-Percentual por antecipação dia corrido, 6-Percentual\
+            \ por antecipação dia útil."
+          type: integer
+        dtdescttit1:
+          description: Data de Desconto 1
+          default: 2025-12-31
+          type: string
+          allOf:
+          - $ref: '#/components/schemas/LocalDate'
+        vlrPercdescttit1:
+          description: valor Perc. Desconto
+          default: 999.99
+          type: number
+        coddescttit2:
+          format: int32
+          description: Cód. Desconto 2
+          default: "Ex: 0-Isento, 1-Valor Fixo até a data informada, 2-Percentual\
+            \ até a data informada, 3-Valor por antecipação dia corrido, 4-Valor por\
+            \ antecipação dia útil, 5-Percentual por antecipação dia corrido, 6-Percentual\
+            \ por antecipação dia útil."
+          type: integer
+        dtdescttit2:
+          description: Data de Desconto 2
+          default: 2025-12-31
+          type: string
+          allOf:
+          - $ref: '#/components/schemas/LocalDate'
+        vlrPercdescttit2:
+          description: valor Perc. Desconto 2
+          default: 999.99
+          type: number
+        coddescttit3:
+          format: int32
+          description: Cód. Desconto 3
+          default: "Ex: 0-Isento, 1-Valor Fixo até a data informada, 2-Percentual\
+            \ até a data informada, 3-Valor por antecipação dia corrido, 4-Valor por\
+            \ antecipação dia útil, 5-Percentual por antecipação dia corrido, 6-Percentual\
+            \ por antecipação dia útil."
+          type: integer
+        dtdescttit3:
+          description: Data de Desconto 3
+          default: 2025-12-31
+          type: string
+          allOf:
+          - $ref: '#/components/schemas/LocalDate'
+        vlrPercdescttit3:
+          description: valor Perc. Desconto 3
+          default: 999.99
+          type: number
+    Endereco:
+      description: Endereço
+      type: object
+      properties:
+        logradouro:
+          description: "Logradouro, Rua, Quadra..."
+          default: Rua Teste do Test
+          type: string
+        numero:
+          description: Número
+          default: "2025"
+          type: string
+        complemento:
+          description: Complemento
+          default: Zona Sul
+          type: string
+        bairro:
+          description: Bairro
+          default: Santa Luzia
+          type: string
+        cidade:
+          description: Cidade
+          default: BRASILIA
+          type: string
+        uf:
+          description: uf
+          default: DF
+          type: string
+        cep:
+          description: CEP
+          default: "70000000"
+          type: string
+    EnderecoDTO:
+      type: object
+      properties:
+        logradouro:
+          description: Endereço
+          default: Quadra 202
+          type: string
+        numero:
+          description: Número
+          default: "Ex: 101"
+          type: string
+        complemento:
+          description: Complemento do Endereço
+          default: "Ex: Plano Piloto"
+          type: string
+        bairro:
+          description: Nome do Bairro
+          default: "Ex: Asa Sul"
+          type: string
+        cidade:
+          description: Nome da Cidade
+          default: "Ex: Brasília"
+          type: string
+        uf:
+          description: Unidade da Federação
+          default: "Ex: DF"
+          type: string
+        cep:
+          description: Número CEP do Complemento
+          default: "99999999"
+          type: string
+    FichaCompensacaoBoletoDTO:
+      type: object
+      properties:
+        txtinfficcompe1:
+          description: Texto Inf. Ficha Compensação 1
+          default: "Texto de observações destinado ao envio de mensagens livres, a\
+            \ serem impressas no campo instruções da Ficha de Compensação"
+          type: string
+        txtinfficcompe2:
+          description: Texto Inf. Ficha Compensação 2
+          default: "Texto de observações destinado ao envio de mensagens livres, a\
+            \ serem impressas no campo instruções da Ficha de Compensação"
+          type: string
+    InclusaoTituloCarneDTO:
+      type: object
+      properties:
+        opcao:
+          format: int32
+          description: Tipo Opção
+          default: "Informe o Id: 1-Inclusão Grupo, 2-Inclusão Carne Grupo, 3-Inclusao\
+            \ Carne."
+          type: integer
+        nuBancoSacado:
+          format: int32
+          description: Número Banco Sacado
+          default: "Ex: 3000"
+          type: integer
+        nuCedente:
+          format: int64
+          description: Id do Beneficiário
+          default: "Ex: 1100689"
+          type: integer
+        nuNossoNumero:
+          format: int64
+          description: Nosso Número
+          default: "Ex: 14000000010194476 ou (0) Zero"
+          type: integer
+        nuSeuNumero:
+          description: Número Documento
+          default: "Ex: 123456"
+          type: string
+        dtVencimento:
+          description: Data de Vencimento
+          default: "31122025"
+          type: string
+        vrAbatimento:
+          description: Valor Abatimento
+          default: 9.99999999999999E12
+          type: number
+        paraProtesto:
+          description: Ação para Protesto
+          default: "Ex: S-SIM, N-NÃO"
+          type: string
+        icProtesto:
+          description: Indicador de Protesto
+          default: "Ex: 1-PROTESTAR, 2-DEVOLVER, 3-PROTESTAR_NEGATIVAR, 4-DEVOLVER_NEGATIVAR"
+          type: string
+        pzProtestoDevolucao:
+          format: int32
+          description: Número Dias Protesto
+          default: "Ex: 999 ( De 1 A 999 )"
+          type: integer
+        nuTpEspecie:
+          format: int32
+          description: Tipo Espécie
+          default: "Informe o Id: 1-CHEQUE, 2-DUPLICATA MERCANTIL, 3-DUPLICATA MERCANTIL\
+            \ POR INDICACAO, 4-DUPLICATA DE SERVICO, 5-DUPLICATA DE SERVICO POR INDICACAO,\
+            \ 6-DUPLICATA RURAL, 7-LETRA DE CAMBIO, 8-NOTA DE CREDITO COMERCIAL, 9-NOTA\
+            \ DE CREDITO A EXPORTACAO, 10-NOTA DE CREDITO INDUSTRIAL, 11-NOTA DE CREDITO\
+            \ RURAL, 12-NOTA PROMISSORIA, 13-NOTA PROMISSORIA RURAL, 14-TRIPLICATA\
+            \ MERCANTIL, 15-TRIPLICATA DE SERVICO, 16-NOTA DE SEGURO, 17-RECIBO, 18-BLOQUETO,\
+            \ 19-NOTA DE DEBITO, 20-APOLICE DE SEGURO, 21-MENSALIDADE ESCOLAR, 22-PARCELA\
+            \ DE CONSORCIO, 23-NOTA FISCAL, 24-DOCUMENTO DE DIVIDA, 25-CEDULA DE PRODUTO\
+            \ RURAL, 31-CARTAO DE CREDITO, 32-BOLETO PROPOSTA, 33-BOLETO DE DEPOSITO\
+            \ E APORTE, 81-INCLUSAO TESTE, 99-OUTROS."
+          type: integer
+        nuTpAceite:
+          description: Flag Aceite
+          default: "Ex: 1 à 6 (1-Com Aceite, 2-Sem Aceite, 3-SP DMI COM DECLARACAO,\
+            \ 4-SP - TIT. COM APRES. FISICA, 5-SP - TIT. COM DECLARACAO, 6-SP - TIT.\
+            \ NEG. COM DIR. REGRESSO"
+          type: string
+        carneSacado:
+          $ref: '#/components/schemas/CarneSacadoDTO'
+        icEndosso:
+          description: Indicador Endosso
+          default: "Ex: S-Sim, N-Não"
+          type: string
+        noSacador:
+          description: Nome do Sacado
+          default: "EX: FULANO DE TAL"
+          type: string
+        nuInscricaoScdr:
+          format: int64
+          description: CPF ou CNPJ
+          default: "Ex: para CPF: 99999999999 ou para CNPJ: 99999999999999"
+          type: integer
+        icPessoaSacador:
+          format: int32
+          description: Tipo Pessoa
+          default: "Ex: 1-Pessoa Fisica ou 2-Pessoa Jurídica"
+          type: integer
+        nuTpJuro:
+          format: int32
+          description: Tipo Juros
+          default: "Ex: Informe o Id: 1 - Valor (dias corridos), 2 - Percentual ao\
+            \ mês (dias corridos), 3 - Isento, 4 - Percentual ao dia (dias corridos),5\
+            \ - Percentual ao ano (dias corridos), 6 - Valor (dia útil), 7 - Percentual\
+            \ ao dia (dias úteis), 8 - Percentual ao mês (dias úteis) e 9 - Percentual\
+            \ ao ano (dias úteis)."
+          type: integer
+        pcJurosDia:
+          description: Percentual Juros Dia
+          default: 999.99
+          type: number
+        registro:
+          description: Registro
+          default: "Ex: S-Sim, N-Não"
+          type: string
+        vrTitulo:
+          description: Valor Titulo
+          default: 9.99999999999999E12
+          type: number
+        nuTpEmissao:
+          format: int32
+          description: Tipo Emissao
+          default: "Ex: 1-CEDENTE e 2-CAIXA"
+          type: integer
+        icFormaEntrega:
+          format: int32
+          description: Indicador Forma Entrega
+          default: "Ex: 1 - Postagem, 2 - Direto Agência, 3- Email e 4 - Malote"
+          type: integer
+        pcMulta:
+          description: Percentual Multa
+          default: 999.99
+          type: number
+        vrMulta:
+          description: Valor Multa
+          default: 9.99999999999999E12
+          type: number
+        pzMulta:
+          format: int32
+          description: Prazo Multa
+          default: "Ex: 999"
+          type: integer
+        dtMulta:
+          description: Data de Multa
+          default: "31122025"
+          type: string
+        deMensagem1:
+          description: Mensagem 1
+          default: Mensagem 1
+          type: string
+        deMensagem2:
+          description: Mensagem 2
+          default: Mensagem 2
+          type: string
+        valorIof:
+          description: Valor IOF
+          default: 9.99999999999999E12
+          type: number
+        registroTitSemReg:
+          description: Registro Titulo Sem Registro
+          default: "Ex: S-Sim, N-Não"
+          type: string
+        icTipoPagamento:
+          format: int32
+          description: Indentificador Tipo Pagamento
+          default: "Ex: ACEITA_QUALQUER_VALOR, ACEITA_VALORES_ENTRE_MINIMO_MAXIMO,\
+            \ NAO_ACEITA_VALOR_DIVERGENTE  e SOMENTE_MINIMO"
+          type: integer
+        vrMaximoPagto:
+          description: Valor Máximo Pagamento
+          default: 9.99999999999999E12
+          type: number
+        vrMinimoPagto:
+          description: Valor Mínimo Pagamento
+          default: 9.99999999999999E12
+          type: number
+        icAutPagtoParc:
+          description: Indentificador Autorizacao Pagamento Parcela
+          default: "Ex: S-Sim, N-Não"
+          type: string
+        qtPagtoPossivel:
+          format: int32
+          description: Quantidade Pagamento Possivel
+          default: "Ex: 99"
+          type: integer
+        vrJuros:
+          description: Valor Juros
+          default: 9.99999999999999E12
+          type: number
+        dtJuros:
+          description: Data de Juros Mora
+          default: "31122025"
+          type: string
+        nuTpDesconto:
+          format: int32
+          description: Cód. Desconto 1
+          default: "Ex: 0-Isento, 1-Valor Fixo até a data informada, 2-Percentual\
+            \ até a data informada, 3-Valor por antecipação dia corrido, 4-Valor por\
+            \ antecipação dia útil, 5-Percentual por antecipação dia corrido, 6-Percentual\
+            \ por antecipação dia útil."
+          type: integer
+        nuCarteira:
+          format: int32
+          description: Número Carteira
+          default: "Ex: 1 - REGISTRADA / 6 - COBRANCA CESSAO"
+          type: integer
+        icNegativacao:
+          description: Indentificador Negativação
+          default: "Ex: S-Sim, N-Não"
+          type: string
+        pzNegativacao:
+          format: int32
+          description: Prazo Negativacao
+          default: "Ex: 999 ( De 2 A 999 )"
+          type: integer
+    InclusaoTituloDTO:
+      type: object
+      properties:
+        idBeneficiario:
+          format: int64
+          description: Id do Beneficiário
+          default: "Ex: 1100689"
+          type: integer
+        nossoNumero:
+          description: Nosso Número
+          default: "Ex: 14000000010194476 ou (0) Zero"
+          type: string
+        numeroDocumento:
+          description: Número Documento
+          default: "Ex: 123456"
+          type: string
+        dataVencimento:
+          description: Data de Vencimento
+          default: 2025-12-31
+          type: string
+          allOf:
+          - $ref: '#/components/schemas/LocalDate'
+        valor:
+          description: Valor
+          default: 9.99999999999999E12
+          type: number
+        tipoEspecie:
+          format: int32
+          description: Tipo Espécie
+          default: "Informe o Id: 1-CHEQUE, 2-DUPLICATA MERCANTIL, 3-DUPLICATA MERCANTIL\
+            \ POR INDICACAO, 4-DUPLICATA DE SERVICO, 5-DUPLICATA DE SERVICO POR INDICACAO,\
+            \ 6-DUPLICATA RURAL, 7-LETRA DE CAMBIO, 8-NOTA DE CREDITO COMERCIAL, 9-NOTA\
+            \ DE CREDITO A EXPORTACAO, 10-NOTA DE CREDITO INDUSTRIAL, 11-NOTA DE CREDITO\
+            \ RURAL, 12-NOTA PROMISSORIA, 13-NOTA PROMISSORIA RURAL, 14-TRIPLICATA\
+            \ MERCANTIL, 15-TRIPLICATA DE SERVICO, 16-NOTA DE SEGURO, 17-RECIBO, 18-BLOQUETO,\
+            \ 19-NOTA DE DEBITO, 20-APOLICE DE SEGURO, 21-MENSALIDADE ESCOLAR, 22-PARCELA\
+            \ DE CONSORCIO, 23-NOTA FISCAL, 24-DOCUMENTO DE DIVIDA, 25-CEDULA DE PRODUTO\
+            \ RURAL, 31-CARTAO DE CREDITO, 32-BOLETO PROPOSTA, 33-BOLETO DE DEPOSITO\
+            \ E APORTE, 81-INCLUSAO TESTE, 99-OUTROS."
+          type: integer
+        flagAceite:
+          description: Flag Aceite
+          default: Informe o A-Sim ou N-Não
+          type: string
+        dataEmissao:
+          description: Data de Emissao
+          default: 31-12-2025
+          type: string
+          allOf:
+          - $ref: '#/components/schemas/LocalDate'
+        jurosMora:
+          description: Juros Mora
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/JurosMoraDTO'
+        valorAbatimento:
+          description: valor de Abatimento
+          default: 9.99999999999999E12
+          type: number
+        posVencimento:
+          description: Pos Vencimento
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/PosVencimentoDTO'
+        codigoMoeda:
+          format: int32
+          description: Código Moeda
+          default: "Informe o ID: 9-Real"
+          type: integer
+        pagador:
+          description: Pagador
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/PagadorDTO'
+        endereco:
+          description: Endereço
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/EnderecoDTO'
+        tpidentcsacdravalst:
+          format: int32
+          description: Tipo Indicador Csacdra Avalalista
+          default: "Informe o Id: 0-Isento / Não Informado, 1-CPF, 2-CNPJ,3-PIS/PASEP,\
+            \ 9-Outros."
+          type: integer
+        avalista:
+          description: Avalista
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/AvalistaDTO'
+        multa:
+          description: Multa
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/MultaDTO'
+        descontos:
+          description: Descontos
+          type: array
+          items:
+            $ref: '#/components/schemas/DescontosTituloDTO'
+        valorIof:
+          description: valor IOF
+          default: 999.99
+          type: number
+        identificacaoEmpresa:
+          description: Identificação do titulo na empresa.
+          default: Campo destinado para uso da Empresa Beneficiário para identificação
+            do Título
+          type: string
+        fichaCompensacao:
+          description: Ficha de Compensação
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/FichaCompensacaoBoletoDTO'
+        reciboPagador:
+          description: Ficha de Compensação
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/ReciboPagadorDTO'
+        pagamento:
+          description: Pagamento
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/PagamentoDTO'
+        carteira:
+          format: int32
+          description: Carteira
+          default: "Informe o Id: 1-Cobrança Simples2-Cobrança Vinculada,3-Cobranç\
+            a Caucionada,4-Cobrança Descontada,5-Cobrança Vendor."
+          type: integer
+        tipoBoleto:
+          description: Tipo de Boleto
+          default: "Ex: PADRAO, HIBRIDO ou QRCODE"
+          type: string
+          allOf:
+          - $ref: '#/components/schemas/TipoBoletoDTO'
+    IntegracaoDTO:
+      type: object
+      properties:
+        codigo:
+          description: Código da Resposta
+          default: "99"
+          type: string
+        mensagem:
+          description: Mensagem da Resposta
+          default: Descrição da reposta de retorno e falhas
+          type: string
+        excecao:
+          description: Erro de Excessão da Resposta
+          default: Descricao da resposta de exceção de falhas
+          type: string
+    JurosMora:
+      description: Juros Mora
+      type: object
+      properties:
+        tipo:
+          description: Tipo Juros Mora
+          default: SEM JUROS
+          type: string
+        data:
+          description: Data Juros Mora
+          default: 2025-12-31
+          type: string
+          allOf:
+          - $ref: '#/components/schemas/LocalDate'
+        valor:
+          description: Valor Juros Mora
+          default: 5.0
+          type: number
+        percentual:
+          description: Percentual Juros Mora
+          default: 10.0
+          type: number
+    JurosMoraDTO:
+      type: object
+      properties:
+        tipo:
+          format: int32
+          description: Tipo de Juros Mora
+          default: "Informe o Id: 1 - Valor (dias corridos), 2 - Percentual ao mê\
+            s (dias corridos), 3 - Isento, 4 - Percentual ao dia (dias corridos),5\
+            \ - Percentual ao ano (dias corridos), 6 - Valor (dia útil), 7 - Percentual\
+            \ ao dia (dias úteis), 8 - Percentual ao mês (dias úteis) e 9 - Percentual\
+            \ ao ano (dias úteis)."
+          type: integer
+        dataJurosMora:
+          description: Data de Juros Mora
+          default: 2025-12-31
+          type: string
+          allOf:
+          - $ref: '#/components/schemas/LocalDate'
+        valorJurosMora:
+          description: Valor de Juros Mora
+          default: 999.99
+          type: number
+        percentualJurosMora:
+          description: Percentual de Juros Mora
+          default: 999.99
+          type: number
+    LocalDate:
+      format: date
+      type: string
+      example: 2022-03-10
+    MsgFichaCompBoletoDTO:
+      type: object
+      properties:
+        nuMensagem:
+          description: Número da Mensagem
+          default: ""
+          type: number
+        deMensagem:
+          description: Texto Inf. Ficha Compensação
+          default: "Texto de observações destinado ao envio de mensagens livres, a\
+            \ serem impressas no campo instruções da Ficha de Compensação"
+          type: string
+    MsgReciboSacadoBoletoDTO:
+      type: object
+      properties:
+        nuMensagem:
+          description: Número da Mensagem
+          default: ""
+          type: number
+        deMensagem:
+          description: Texto Inf. Ficha Compensação
+          default: "Texto de observações destinado ao envio de mensagens livres, a\
+            \ serem impressas no campo instruções da Recibo Sacado"
+          type: string
+    Multa:
+      description: Multa
+      type: object
+      properties:
+        data:
+          description: Data Multa
+          default: 2025-12-30
+          type: string
+          allOf:
+          - $ref: '#/components/schemas/LocalDate'
+        valor:
+          format: double
+          description: Valor Multa
+          default: 0.0
+          type: number
+        percentual:
+          format: double
+          description: Percentual Multa
+          default: 99.0
+          type: number
+    MultaDTO:
+      type: object
+      properties:
+        codmultatit:
+          format: int32
+          description: Cod. Multa
+          default: "Informe o Id: 0-Isenta. 1-Valor Fixo, 2-Percentual"
+          type: integer
+        dataMulta:
+          description: Data da Multa
+          default: 2025-12-31
+          type: string
+          allOf:
+          - $ref: '#/components/schemas/LocalDate'
+        vlrPercmultatit:
+          description: valor Percentual Multa
+          default: 999.99
+          type: number
+    NegativacaoDTO:
+      required:
+      - nossoNumero
+      - idBeneficiario
+      type: object
+      properties:
+        nossoNumero:
+          description: Nosso Numero
+          type: integer
+          example: 1233321233
+        idBeneficiario:
+          format: int32
+          description: Id do Beneficiário
+          type: integer
+          example: 123
+    NegocialDTO:
+      type: object
+      properties:
+        origem:
+          description: Origem da Resposta
+          default: Método de Resposta do Erro
+          type: string
+        codigo:
+          description: codigo da Resposta
+          default: "99"
+          type: string
+        mensagem:
+          description: Mensagem da Resposta
+          default: Mensagem genérica de acordo com o erro do método
+          type: string
+        excecao:
+          description: Erro de Excessão da Resposta
+          default: Descricao da resposta de exceção de falhas
+          type: string
+        exception:
+          format: int32
+          description: statusType
+          default: 200
+          type: integer
+    NotificaURLDTO:
+      type: object
+      properties:
+        idBeneficiario:
+          format: int64
+          description: Id do Beneficiário
+          type: integer
+          example: "Informe o Id do Beneficiário de 1 a 10 Caracteres Númericos Ex:\
+            \ 1100689"
+        cpfCnpj:
+          description: CPF ou CNPJ
+          default: "Ex: para CPF: 99999999999 ou para CNPJ: 99999999999999"
+          type: string
+        notificacaoURL:
+          description: Url da Notificação
+          default: "Ex: https://www.dominio.com.br/url_notificacao"
+          type: string
+        urlWebhook:
+          type: string
+        requestId:
+          type: string
+    Pagador:
+      description: Pagador
+      type: object
+      properties:
+        pessoaFisica:
+          $ref: '#/components/schemas/PessoaFisica'
+        pessoaJuridica:
+          $ref: '#/components/schemas/PessoaJuridica'
+        endereco:
+          description: "Logradouro, Rua, Quadra..."
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/Endereco'
+    PagadorAlteraDTO:
+      type: object
+      properties:
+        nome:
+          description: Nome Pessoa Física ou Juridica
+          default: "Ex: João da Silva"
+          type: string
+    PagadorDTO:
+      type: object
+      properties:
+        cnpjCpf:
+          description: Cnpj ou CPF
+          default: "CPF: 99999999999 ou para CNPJ: 99999999999999"
+          type: string
+        nome:
+          description: Nome Pessoa Física ou Juridica
+          default: "Ex: João da Silva"
+          type: string
+    Pagamento:
+      type: object
+      properties:
+        quantidadePermitida:
+          format: int32
+          description: Quantidade Permitida
+          default: 83
+          type: integer
+        tipo:
+          description: Tipo
+          default: "2"
+          type: string
+        valor:
+          description: Valor Pagamento
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/Valor1'
+        percentual:
+          description: Percentual
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/Percentual1'
+        flagPagamentoParcial:
+          description: Flag Pagamento Parcial
+          default: S
+          type: string
+    PagamentoDTO:
+      type: object
+      properties:
+        quantidadePermitida:
+          format: int32
+          description: Quantidade Permitida
+          default: 99
+          type: integer
+        tipo:
+          description: Tipo de Pagamento
+          default: "Ex: ACEITA_QUALQUER_VALOR, ACEITA_VALORES_ENTRE_MINIMO_MAXIMO,\
+            \ NAO_ACEITA_VALOR_DIVERGENTE  e SOMENTE_MINIMO"
+          type: string
+          allOf:
+          - $ref: '#/components/schemas/TipoPagamentoDTO'
+        indrvlrPercTit:
+          format: int32
+          description: Indicador Valor Perc. Max. Título
+          default: "Ex: Recebe 1 ou 2 sendo que 1 é percentual e 2 é valor esta vinculado\
+            \ aos campos"
+          type: integer
+        valor:
+          $ref: '#/components/schemas/Valor'
+        percentual:
+          description: Percentual Pagamento
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/Percentual'
+        indPgtoParcl:
+          description: Indicador Pagamento Parcial
+          default: "Ex: S ou N"
+          type: string
+    Percentual:
+      type: object
+      properties:
+        minimo:
+          description: Valor Mínimo
+          default: 999.99
+          type: number
+        maximo:
+          description: Valor Máximo
+          default: 999.99
+          type: number
+    Percentual1:
+      type: object
+      properties:
+        minimo:
+          format: double
+          type: number
+        maximo:
+          format: double
+          type: number
+    PessoaFisica:
+      description: Pessoa Fisica
+      type: object
+      properties:
+        cpf:
+          description: CPF
+          default: "80393756904"
+          type: string
+        nome:
+          description: Nome Pessoa Física
+          default: ADILSON ANTONIO BUSS
+          type: string
+    PessoaJuridica:
+      description: Pessoa Jurídica
+      default: {}
+      type: object
+      properties:
+        cnpj:
+          description: CNPJ
+          default: "99999999999999"
+          type: string
+        razao_social:
+          description: Razão Social
+          default: ""
+          type: string
+    PosVencimento:
+      description: Pos Vencimento
+      type: object
+      properties:
+        acao:
+          description: Ação Vencimento
+          default: DEVOLVER
+          type: string
+        numeroDias:
+          format: int32
+          description: Número Dias
+          default: 5
+          type: integer
+        prazoNegativacao:
+          format: int32
+          description: Prazo Negativação
+          default: 0
+          type: integer
+    PosVencimentoDTO:
+      type: object
+      properties:
+        acao:
+          format: int32
+          description: Ação Pos Vencimento
+          default: "Ex: 1-PROTESTAR, 2-DEVOLVER, 3-PROTESTAR_NEGATIVAR, 4-DEVOLVER_NEGATIVAR"
+          type: integer
+        numeroDias:
+          format: int32
+          description: Número de dias para o protesto ou baixa por devolução do título
+            não pago após o vencimento.
+          default: "Ex: 999"
+          type: integer
+        prazoNegativacao:
+          format: int32
+          description: Prazo para Negativação
+          default: "Ex: 99"
+          type: integer
+    ReciboPagadorDTO:
+      type: object
+      properties:
+        txtinfrecpagdr1:
+          description: Texto Inf. Ficha Compensação 1
+          default: "Texto de observações destinado ao envio de mensagens livres, a\
+            \ serem impressas na parte Recibo do Pagador do boleto"
+          type: string
+        txtinfrecpagdr2:
+          description: Texto Inf. Ficha Compensação 1
+          default: "Texto de observações destinado ao envio de mensagens livres, a\
+            \ serem impressas na parte Recibo do Pagador do boleto"
+          type: string
+        txtinfrecpagdr3:
+          description: Texto Inf. Ficha Compensação 3
+          default: "Texto de observações destinado ao envio de mensagens livres, a\
+            \ serem impressas na parte Recibo do Pagador do boleto"
+          type: string
+        txtinfrecpagdr4:
+          description: Texto Inf. Ficha Compensação 4
+          default: "Texto de observações destinado ao envio de mensagens livres, a\
+            \ serem impressas na parte Recibo do Pagador do boleto"
+          type: string
+    TipoBoletoDTO:
+      enum:
+      - PADRAO
+      - HIBRIDO
+      - QRCODE
+      type: string
+    TipoPagamentoDTO:
+      enum:
+      - ACEITA_QUALQUER_VALOR
+      - ACEITA_VALORES_ENTRE_MINIMO_MAXIMO
+      - NAO_ACEITA_VALOR_DIVERGENTE
+      - SOMENTE_MINIMO
+      type: string
+    Valor:
+      type: object
+      properties:
+        minimo:
+          description: Valor Mínimo
+          default: 9.99999999999999E12
+          type: number
+        maximo:
+          description: Valor Máximo
+          default: 9.99999999999999E12
+          type: number
+    Valor1:
+      type: object
+      properties:
+        minimo:
+          format: double
+          description: Mínimo
+          default: 0.0
+          type: number
+        maximo:
+          format: double
+          description: Máximo
+          default: 0.0
+          type: number
+  securitySchemes:
+    Authentication:
+      type: oauth2
+      description: token gerado na autenticação de usuário
+      flows:
+        clientCredentials:
+          tokenUrl: https://login.des.caixa/auth/realms/intranet
+          refreshUrl: https://login.des.caixa/auth/realms/intranet
+          scopes: {}
+    apiKey:
+      type: apiKey
+      description: apiKey
+      name: X-API-KEY
+      in: header
